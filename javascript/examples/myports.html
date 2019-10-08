@@ -589,19 +589,17 @@
 				if (this.isEnabled() &&
 					!mxEvent.isConsumed(evt) &&
 					cell != null &&
-					this.isCellEditable(cell) && cell.contentFunc)
-				{
+					this.isCellEditable(cell)) {
 					if (this.model.isEdge(cell) ||
-						!this.isHtmlLabel(cell))
-					{
+						!this.isHtmlLabel(cell)) {
 						this.startEditingAtCell(cell);
 					}
-					else
-					{
-						showEditorWindow(this, '属性设置', cell, 240, 300);
+					else {
+						if(cell.contentFunc){
+							showEditorWindow(this, '属性设置', cell, 240, 300);
+						}
 					}
 				}
-
 				// Disables any default behaviour for the double click
 				mxEvent.consume(evt);
 			};
