@@ -28,6 +28,7 @@
 
 	<!-- Loads and initializes the library -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
+	<script type="text/javascript" src="./js/data.js"></script>
 
 	<!-- Example code -->
 	<script type="text/javascript" content="">
@@ -55,7 +56,8 @@
 				// Disable highlight of cells when dragging from toolbar
 				// graph.setDropEnabled(false);
 
-				setDefaultConfig(graph);
+				setDefaultConfig(graph, editor);
+
 				setAnchors(graph);
 				setGrouping(editor);
 				setShortLabel(graph);
@@ -75,31 +77,32 @@
 
 				// Adds sidebar icons.
 				//
-				addSidebarIcon(graph, sidebar,
-					'<h1 style="margin:0px;">任务</h1><br>'+
-					'todoDespssdddd...<br>todoDespss...<br>todoDespss...<br>',
-					'images/icons48/gear.png', false, '');
-
-				addSidebarIcon(graph, sidebar,
-					'<h1 style="margin:0px;">邮件</h1><br>'+
-						'todoDespssdddd...<br>',
-					'images/icons48/mail_new.png', false, '');
-
-				addSidebarIcon(graph, sidebar,
-						'<h1 style="margin:0px;">开始</h1>',
-						'images/icons48/event.png', true, 'fillColor=#cdeb8b;shape=ellipse');
-
-				addSidebarIcon(graph, sidebar,
-						'<h1 style="margin:0px;">结束</h1>',
-						'images/icons48/event_end.png', true, 'fillColor=#ffc7c7;shape=ellipse');
-
-				addSidebarIcon(graph, sidebar,
-						'<h1 style="margin:0px;">异常</h1>',
-						'images/icons48/error.png', true, 'fillColor=#f52212;shape=ellipse');
-
-				addSidebarIcon(graph, sidebar,
-						'<h1 style="margin:0px;">分支</h1>',
-						'images/icons48/merge.png', true, 'fillColor=#91bcc0;shape=ellipse');
+				elements.forEach(element => addSidebarIcon(graph, sidebar,element));
+//				addSidebarIcon(graph, sidebar,
+//					'<h1 style="margin:0px;">任务</h1><br>'+
+//					'todoDespssdddd...<br>todoDespss...<br>todoDespss...<br>',
+//					'images/icons48/gear.png', false, '');
+//
+//				addSidebarIcon(graph, sidebar,
+//					'<h1 style="margin:0px;">邮件</h1><br>'+
+//						'todoDespssdddd...<br>',
+//					'images/icons48/mail_new.png', false, '');
+//
+//				addSidebarIcon(graph, sidebar,
+//						'<h1 style="margin:0px;">开始</h1>',
+//						'images/icons48/event.png', true, 'fillColor=#cdeb8b;shape=ellipse', elements[0], createStartContent);
+//
+//				addSidebarIcon(graph, sidebar,
+//						'<h1 style="margin:0px;">结束</h1>',
+//						'images/icons48/event_end.png', true, 'fillColor=#ffc7c7;shape=ellipse', elements[0], createStartContent);
+//
+//				addSidebarIcon(graph, sidebar,
+//						'<h1 style="margin:0px;">异常</h1>',
+//						'images/icons48/error.png', true, 'fillColor=#f52212;shape=ellipse');
+//
+//				addSidebarIcon(graph, sidebar,
+//						'<h1 style="margin:0px;">分支</h1>',
+//						'images/icons48/merge.png', true, 'fillColor=#91bcc0;shape=ellipse');
 
 
 				// Creates a new DIV that is used as a toolbar and adds
@@ -233,6 +236,62 @@
 			toolbar.appendChild(button);
 		};
 
+		function showEditorWindow(graph, title, cell, width, height)
+		{
+			var content = cell.contentFunc();
+
+			var background = document.createElement('div');
+			background.style.position = 'absolute';
+			background.style.left = '0px';
+			background.style.top = '0px';
+			background.style.right = '0px';
+			background.style.bottom = '0px';
+			background.style.background = 'black';
+			mxUtils.setOpacity(background, 50);
+			document.body.appendChild(background);
+
+			if (mxClient.IS_IE)
+			{
+				new mxDivResizer(background);
+			}
+
+			var x = Math.max(0, document.body.scrollWidth/2-width/2);
+			var y = Math.max(10, (document.body.scrollHeight ||
+				document.documentElement.scrollHeight)/2-height*2/3);
+			var wnd = new mxWindow(title, content, x, y, width, height, false, true);
+			wnd.setClosable(true);
+
+			// Fades the background out after after the window has been closed
+			wnd.addListener(mxEvent.DESTROY, function(evt)
+			{
+				graph.setEnabled(true);
+				mxEffects.fadeOut(background, 50, true,
+					10, 30, true);
+			});
+
+			let table = content.getElementsByTagName('table')[0];
+			let tr = document.createElement('tr');
+			tr.appendChild(document.createElement('td'));
+
+			let td = document.createElement('td');
+			td.appendChild(mxUtils.button('确定', function() {
+				content.func(cell);
+				graph.cellLabelChanged(cell, cell.data, true);
+
+				wnd.destroy();
+			}));
+
+			td.appendChild(mxUtils.button('取消', function() {
+				wnd.destroy();
+			}));
+			tr.appendChild(td);
+			table.appendChild(tr);
+
+			graph.setEnabled(false);
+			graph.tooltipHandler.hide();
+			wnd.setVisible(true);
+		};
+
 		function showModalWindow(graph, title, content, width, height)
 		{
 			var background = document.createElement('div');
@@ -269,8 +328,15 @@
 			wnd.setVisible(true);
 		};
 
-		function addSidebarIcon(graph, sidebar, label, image, isControllNode, style)
+		/**
+		 *
+		 *
+		 * contentFunc 双击后弹出框的内容
+		**/
+		function addSidebarIcon(graph, sidebar, elementdata)
 		{
+			let element = Object.assign({}, elementdata);
+
 			// Function that is executed when the image is dropped on
 			// the graph. The cell argument points to the cell under
 			// the mousepointer if there is one.
@@ -288,25 +354,20 @@
 					// rather than the label markup, so use 'image=' + image for the style.
 					// as follows: v1 = graph.insertVertex(parent, null, label,
 					// pt.x, pt.y, 120, 120, 'image=' + image);
-					if(isControllNode){
-						v1 = graph.insertVertex(parent, null, label, x, y, 80, 80, style);
+
+					if(element.isControllNode){
+						v1 = graph.insertVertex(parent, null, element, x, y, 80, 80, element.style);
 					}else{
-						v1 = graph.insertVertex(parent, null, label, x, y, 120, 80, style);
+						v1 = graph.insertVertex(parent, null, element, x, y, 120, 80, element.style);
 					}
 
-					// v1.setConnectable(false);
-
 					// 自定义的业务数据放在 data 属性
-					let idSeed = 10001;
-					v1.data = {
-						id: idSeed,
-						element: 'element',
-						normalType: 'ttt',
-					};
+					v1.data = element
+					v1.contentFunc = element.contentFunc;
 
 
 					// Presets the collapsed size
-					if(isControllNode){
+					if(element.isControllNode){
 						v1.geometry.alternateBounds = new mxRectangle(0, 0, 40, 40);
 					}else{
 						v1.geometry.alternateBounds = new mxRectangle(0, 0, 100, 40);
@@ -316,7 +377,7 @@
 					// Adds the ports at various relative locations
 					var port = graph.insertVertex(v1, null, 'Info', 1, 1, 16, 16,
 							'port;image=editors/images/overlays/information.png;spacingLeft=18', true);
-					if(isControllNode){
+					if(element.isControllNode){
 						port.geometry.offset = new mxPoint(-16, -16);
 					}else {
 						port.geometry.offset = new mxPoint(-8, -8);
@@ -333,7 +394,7 @@
 
 			// Creates the image which is used as the sidebar icon (drag source)
 			var img = document.createElement('img');
-			img.setAttribute('src', image);
+			img.setAttribute('src', element.image);
 			img.style.width = '24px';
 			img.style.height = '24px';
 			img.style.margin = '12px';
@@ -354,7 +415,7 @@
 		 *  全局的默认配置
 		 * @param graph
 		 */
-		function setDefaultConfig(graph){
+		function setDefaultConfig(graph, editor){
 			// Assigns some global constants for general behaviour, eg. minimum
 			// size (in pixels) of the active region for triggering creation of
 			// new connections, the portion (100%) of the cell area to be used
@@ -372,6 +433,8 @@
 				return !mxEvent.isAltDown(evt);
 			};
 
+			// 拖拽过程如果没有终点则复制一个节点
+			editor.graph.connectionHandler.setCreateTarget(true);
 			// 禁止游离线条
 			graph.setDisconnectOnMove(false);
 			graph.setAllowDanglingEdges(false);
@@ -419,6 +482,19 @@
 
 			// Enables new connections
 			graph.setConnectable(true);
+
+			// Overrides method to provide a cell label in the display
+			graph.convertValueToString = function(cell)
+			{
+				if(cell.isVertex()){
+					let element = cell.getValue();
+					let desp =  element.isControllNode? '' : element.typeDesp;
+
+					return '<br><h1 style="margin:0px;">'+ element.typeName +'</h1><br>' + desp;
+				}
+				return cell.getValue();
+			};
+
 		};
 
 		function setAnchors(graph) {
@@ -513,7 +589,7 @@
 				if (this.isEnabled() &&
 					!mxEvent.isConsumed(evt) &&
 					cell != null &&
-					this.isCellEditable(cell))
+					this.isCellEditable(cell) && cell.contentFunc)
 				{
 					if (this.model.isEdge(cell) ||
 						!this.isHtmlLabel(cell))
@@ -522,9 +598,7 @@
 					}
 					else
 					{
-						var content = document.createElement('div');
-						content.innerHTML = this.convertValueToString(cell);
-						showModalWindow(this, 'Properties', content, 400, 300);
+						showEditorWindow(this, '属性设置', cell, 240, 300);
 					}
 				}
 
@@ -532,6 +606,7 @@
 				mxEvent.consume(evt);
 			};
 		}
+
 		function configureStylesheet(graph) {
 			var style = new Object();
 			style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
