@@ -7,77 +7,75 @@
 -->
 <html>
 <head>
-	<title>Ports example</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<style type="text/css" media="screen">
-		BODY {
-			font-family: Arial;
-		}
-		H1 {
-			font-size: 18px;
-		}
-		H2 {
-			font-size: 16px;
-		}
-	</style>
+    <title>Ports example</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style type="text/css" media="screen">
+        BODY {
+            font-family: Arial;
+        }
 
-	<!-- Sets the basepath for the library if not in same directory -->
-	<script type="text/javascript">
+        H1 {
+            font-size: 18px;
+        }
+
+        H2 {
+            font-size: 16px;
+        }
+    </style>
+
+    <!-- Sets the basepath for the library if not in same directory -->
+    <script type="text/javascript">
 		mxBasePath = '../src';
-	</script>
+    </script>
 
-	<!-- Loads and initializes the library -->
-	<script type="text/javascript" src="../src/js/mxClient.js"></script>
-	<script type="text/javascript" src="./js/data.js"></script>
+    <!-- Loads and initializes the library -->
+    <script type="text/javascript" src="../src/js/mxClient.js"></script>
+    <script type="text/javascript" src="./js/data.js"></script>
 
-	<!-- Example code -->
-	<script type="text/javascript" content="">
+    <!-- Example code -->
+    <script type="text/javascript" content="">
+		var graph = null;
 		// Program starts here. Creates a sample graph in the
 		// DOM node with the specified ID. This function is invoked
 		// from the onLoad event handler of the document (see below).
-		function main(container, outline, toolbar, sidebar, status)
-		{
+		function main(container, outline, toolbar, sidebar, status) {
 			// Checks if the browser is supported
-			if (!mxClient.isBrowserSupported())
-			{
+			if (!mxClient.isBrowserSupported()) {
 				// Displays an error message if the browser is not supported.
 				mxUtils.error('Browser is not supported!', 200, false);
-			}
-			else
-			{
+			} else {
 				// Creates a wrapper editor with a graph inside the given container.
 				// The editor is used to create certain functionality for the
 				// graph, such as the rubberband selection, but most parts
 				// of the UI are custom in this example.
 				var editor = new mxEditor();
-				var graph = editor.graph;
+				graph = editor.graph;
 				var model = graph.getModel();
 
 				// Disable highlight of cells when dragging from toolbar
 				// graph.setDropEnabled(false);
 
-				setDefaultConfig(graph, editor);
+				setDefaultConfig(editor);
 
-				setAnchors(graph);
+				setAnchors();
 				setGrouping(editor);
-				setShortLabel(graph);
+				setShortLabel();
 
 				// 设置editor对象的快捷键
 				editor.setGraphContainer(container);
 				var config = mxUtils.load(
-					'editors/config/keyhandler-commons.xml').
-						getDocumentElement();
+					'editors/config/keyhandler-commons.xml').getDocumentElement();
 				editor.configure(config);
 
 				//设置事件处理
-				setEvent(graph);
+				setEvent();
 
 				// 设置样式
-				configureStylesheet(graph);
+				configureStylesheet();
 
 				// Adds sidebar icons.
 				//
-				elements.forEach(element => addSidebarIcon(graph, sidebar,element));
+				elements.forEach(element => addSidebarIcon(sidebar, element));
 
 				// Creates a new DIV that is used as a toolbar and adds
 				// toolbar buttons.
@@ -88,15 +86,11 @@
 				addToolbarButton(editor, toolbar, 'groupOrUngroup', '(Un)group', 'images/group.png');
 
 				// Defines a new action for deleting or ungrouping
-				editor.addAction('groupOrUngroup', function(editor, cell)
-				{
+				editor.addAction('groupOrUngroup', function (editor, cell) {
 					cell = cell || editor.graph.getSelectionCell();
-					if (cell != null && editor.graph.isSwimlane(cell))
-					{
+					if (cell != null && editor.graph.isSwimlane(cell)) {
 						editor.execute('ungroup', cell);
-					}
-					else
-					{
+					} else {
 						editor.execute('group');
 					}
 				});
@@ -122,8 +116,7 @@
 				toolbar.appendChild(spacer.cloneNode(true));
 
 				// Defines a new export action
-				editor.addAction('export', function(editor, cell)
-				{
+				editor.addAction('export', function (editor, cell) {
 					var textarea = document.createElement('textarea');
 					textarea.style.width = '400px';
 					textarea.style.height = '400px';
@@ -135,7 +128,7 @@
 
 				addToolbarButton(editor, toolbar, 'export', 'Export', 'images/export1.png');
 				//
-				addToolbarButton(editor, toolbar, 'save', 'Import', 'images/export1.png');
+				addImportButton(editor, toolbar, 'Import', 'images/export1.png');
 				addToolbarButton(editor, toolbar, 'save', 'Save', 'images/export1.png');
 
 				// ---
@@ -167,15 +160,11 @@
 
 				// Fades-out the splash screen after the UI has been loaded.
 				var splash = document.getElementById('splash');
-				if (splash != null)
-				{
-					try
-					{
+				if (splash != null) {
+					try {
 						mxEvent.release(splash);
 						mxEffects.fadeOut(splash, 100, true);
-					}
-					catch (e)
-					{
+					} catch (e) {
 
 						// mxUtils is not available (library not loaded)
 						splash.parentNode.removeChild(splash);
@@ -185,12 +174,10 @@
 		};
 
 		//********************************************************************************************//
-		function addToolbarButton(editor, toolbar, action, label, image, isTransparent)
-		{
+		function addToolbarButton(editor, toolbar, action, label, image, isTransparent) {
 			var button = document.createElement('button');
 			button.style.fontSize = '10';
-			if (image != null)
-			{
+			if (image != null) {
 				var img = document.createElement('img');
 				img.setAttribute('src', image);
 				img.style.width = '16px';
@@ -199,22 +186,77 @@
 				img.style.marginRight = '2px';
 				button.appendChild(img);
 			}
-			if (isTransparent)
-			{
+			if (isTransparent) {
 				button.style.background = 'transparent';
 				button.style.color = '#FFFFFF';
 				button.style.border = 'none';
 			}
-			mxEvent.addListener(button, 'click', function(evt)
-			{
+			mxEvent.addListener(button, 'click', function (evt) {
 				editor.execute(action);
 			});
 			mxUtils.write(button, label);
 			toolbar.appendChild(button);
 		};
 
-		function showEditorWindow(graph, title, cell, width, height)
-		{
+		function readFile(evt) {
+			let file = evt.target.files[0];
+			let reader = new FileReader();
+			reader.onload = (e) => {
+				let txt = e.target.result;
+				importModelXML(txt);
+			};
+			reader.readAsText(file);
+		};
+
+		function importModelXML(xmlTxt) {
+			graph.getModel().beginUpdate();
+			try {
+				let doc = mxUtils.parseXml(xmlTxt);
+				let root = doc.documentElement;
+				let dec = new mxCodec(root.ownerDocument);
+				dec.decode(root, graph.getModel());
+			} finally {
+				graph.getModel().endUpdate();
+			}
+
+			Object.values(graph.getModel().cells)
+				.forEach(cell => {
+					if (cell.vertex && cell.data) {
+						cell.data = JSON.parse(cell.data);
+					}
+				});
+		};
+
+		function addImportButton(editor, toolbar, label, image) {
+			var fileInput = document.createElement('input');
+			fileInput.setAttribute('style', 'display:none');
+			fileInput.setAttribute('type', 'file');
+			fileInput.addEventListener('change', readFile);
+
+			var button = document.createElement('button');
+			button.style.fontSize = '10';
+			if (image != null) {
+				var img = document.createElement('img');
+				img.setAttribute('src', image);
+				img.style.width = '16px';
+				img.style.height = '16px';
+				img.style.verticalAlign = 'middle';
+				img.style.marginRight = '2px';
+				button.appendChild(img);
+			}
+
+			mxEvent.addListener(button, 'click', function (evt) {
+				fileInput.click();
+			});
+			mxUtils.write(button, label);
+
+			toolbar.appendChild(fileInput);
+			toolbar.appendChild(button);
+
+		};
+
+
+		function showEditorWindow(graph, title, cell, width, height) {
 			var content = cell.contentFunc();
 
 			var background = document.createElement('div');
@@ -227,20 +269,18 @@
 			mxUtils.setOpacity(background, 50);
 			document.body.appendChild(background);
 
-			if (mxClient.IS_IE)
-			{
+			if (mxClient.IS_IE) {
 				new mxDivResizer(background);
 			}
 
-			var x = Math.max(0, document.body.scrollWidth/2-width/2);
+			var x = Math.max(0, document.body.scrollWidth / 2 - width / 2);
 			var y = Math.max(10, (document.body.scrollHeight ||
-				document.documentElement.scrollHeight)/2-height*2/3);
+				document.documentElement.scrollHeight) / 2 - height * 2 / 3);
 			var wnd = new mxWindow(title, content, x, y, width, height, false, true);
 			wnd.setClosable(true);
 
 			// Fades the background out after after the window has been closed
-			wnd.addListener(mxEvent.DESTROY, function(evt)
-			{
+			wnd.addListener(mxEvent.DESTROY, function (evt) {
 				graph.setEnabled(true);
 				mxEffects.fadeOut(background, 50, true,
 					10, 30, true);
@@ -251,14 +291,14 @@
 			tr.appendChild(document.createElement('td'));
 
 			let td = document.createElement('td');
-			td.appendChild(mxUtils.button('确定', function() {
+			td.appendChild(mxUtils.button('确定', function () {
 				content.func(cell);
 				graph.cellLabelChanged(cell, cell.data, true);
 
 				wnd.destroy();
 			}));
 
-			td.appendChild(mxUtils.button('取消', function() {
+			td.appendChild(mxUtils.button('取消', function () {
 				wnd.destroy();
 			}));
 			tr.appendChild(td);
@@ -269,8 +309,7 @@
 			wnd.setVisible(true);
 		};
 
-		function showModalWindow(graph, title, content, width, height)
-		{
+		function showModalWindow(graph, title, content, width, height) {
 			var background = document.createElement('div');
 			background.style.position = 'absolute';
 			background.style.left = '0px';
@@ -281,20 +320,18 @@
 			mxUtils.setOpacity(background, 50);
 			document.body.appendChild(background);
 
-			if (mxClient.IS_IE)
-			{
+			if (mxClient.IS_IE) {
 				new mxDivResizer(background);
 			}
 
-			var x = Math.max(0, document.body.scrollWidth/2-width/2);
+			var x = Math.max(0, document.body.scrollWidth / 2 - width / 2);
 			var y = Math.max(10, (document.body.scrollHeight ||
-						document.documentElement.scrollHeight)/2-height*2/3);
+				document.documentElement.scrollHeight) / 2 - height * 2 / 3);
 			var wnd = new mxWindow(title, content, x, y, width, height, false, true);
 			wnd.setClosable(true);
 
 			// Fades the background out after after the window has been closed
-			wnd.addListener(mxEvent.DESTROY, function(evt)
-			{
+			wnd.addListener(mxEvent.DESTROY, function (evt) {
 				graph.setEnabled(true);
 				mxEffects.fadeOut(background, 50, true,
 					10, 30, true);
@@ -309,15 +346,13 @@
 		 *
 		 *
 		 * contentFunc 双击后弹出框的内容
-		**/
-		function addSidebarIcon(graph, sidebar, elementdata)
-		{
+		 **/
+		function addSidebarIcon(sidebar, elementdata) {
 
 			// Function that is executed when the image is dropped on
 			// the graph. The cell argument points to the cell under
 			// the mousepointer if there is one.
-			var funct = function(graph, evt, cell, x, y)
-			{
+			var funct = function (graph, evt, cell, x, y) {
 				let element = Object.assign({}, elementdata);
 
 				var parent = graph.getDefaultParent();
@@ -326,16 +361,15 @@
 				let v1 = null;
 
 				model.beginUpdate();
-				try
-				{
+				try {
 					// NOTE: For non-HTML labels the image must be displayed via the style
 					// rather than the label markup, so use 'image=' + image for the style.
 					// as follows: v1 = graph.insertVertex(parent, null, label,
 					// pt.x, pt.y, 120, 120, 'image=' + image);
 
-					if(element.isControllNode){
+					if (element.isControllNode) {
 						v1 = graph.insertVertex(parent, null, element, x, y, 80, 80, element.style);
-					}else{
+					} else {
 						v1 = graph.insertVertex(parent, null, element, x, y, 120, 80, element.style);
 					}
 
@@ -345,25 +379,23 @@
 
 
 					// Presets the collapsed size
-					if(element.isControllNode){
+					if (element.isControllNode) {
 						v1.geometry.alternateBounds = new mxRectangle(0, 0, 40, 40);
-					}else{
+					} else {
 						v1.geometry.alternateBounds = new mxRectangle(0, 0, 100, 40);
 					}
 
 
 					// Adds the ports at various relative locations
 					var port = graph.insertVertex(v1, null, 'Info', 1, 1, 16, 16,
-							'port;image=editors/images/overlays/information.png;spacingLeft=18', true);
-					if(element.isControllNode){
+						'port;image=editors/images/overlays/information.png;spacingLeft=18', true);
+					if (element.isControllNode) {
 						port.geometry.offset = new mxPoint(-16, -16);
-					}else {
+					} else {
 						port.geometry.offset = new mxPoint(-8, -8);
 					}
 
-				}
-				finally
-				{
+				} finally {
 					model.endUpdate();
 				}
 
@@ -397,7 +429,7 @@
 		 *  全局的默认配置
 		 * @param graph
 		 */
-		function setDefaultConfig(graph, editor){
+		function setDefaultConfig(editor) {
 			// Assigns some global constants for general behaviour, eg. minimum
 			// size (in pixels) of the active region for triggering creation of
 			// new connections, the portion (100%) of the cell area to be used
@@ -410,13 +442,12 @@
 			mxGraphHandler.prototype.guidesEnabled = true;
 
 			// Alt disables guides
-			mxGuide.prototype.isEnabledForEvent = function(evt)
-			{
+			mxGuide.prototype.isEnabledForEvent = function (evt) {
 				return !mxEvent.isAltDown(evt);
 			};
 
 			// 拖拽过程如果没有终点则复制一个节点
-			editor.graph.connectionHandler.setCreateTarget(true);
+			// editor.graph.connectionHandler.setCreateTarget(true);
 			// 禁止游离线条
 			graph.setDisconnectOnMove(false);
 			graph.setAllowDanglingEdges(false);
@@ -425,8 +456,7 @@
 			mxEdgeHandler.prototype.snapToTerminals = true;
 
 			// Workaround for Internet Explorer ignoring certain CSS directives
-			if (mxClient.IS_QUIRKS)
-			{
+			if (mxClient.IS_QUIRKS) {
 				document.body.style.overflow = 'hidden';
 				new mxDivResizer(container);
 				new mxDivResizer(outline);
@@ -436,14 +466,12 @@
 			}
 
 			// Disables drilling into non-swimlanes.
-			graph.isValidRoot = function(cell)
-			{
+			graph.isValidRoot = function (cell) {
 				return this.isValidDropTarget(cell);
 			}
 
 			// Does not allow selection of locked cells
-			graph.isCellSelectable = function(cell)
-			{
+			graph.isCellSelectable = function (cell) {
 				return !this.isCellLocked(cell);
 			};
 
@@ -457,8 +485,7 @@
 			// styles or interactive form fields. Otherwise non-HTML labels
 			// should be used by not overidding the following function.
 			// See also: configureStylesheet.
-			graph.isHtmlLabel = function(cell)
-			{
+			graph.isHtmlLabel = function (cell) {
 				return !this.isSwimlane(cell);
 			}
 
@@ -466,20 +493,19 @@
 			graph.setConnectable(true);
 
 			// Overrides method to provide a cell label in the display
-			graph.convertValueToString = function(cell)
-			{
-				if(cell.isVertex()){
+			graph.convertValueToString = function (cell) {
+				if (cell.isVertex()) {
 					let element = cell.getValue();
-					let desp =  element.isControllNode? '' : element.typeDesp;
-					desp = desp?'<br>' + desp : '';
-					return '<h1 style="margin:0px;">'+ element.typeName +'</h1>' + desp;
+					let desp = element.isControllNode ? '' : element.typeDesp;
+					desp = desp ? '<br>' + desp : '';
+					return '<h1 style="margin:0px;">' + element.typeName + '</h1>' + desp;
 				}
 				return cell.getValue();
 			};
 
 		};
 
-		function setAnchors(graph) {
+		function setAnchors() {
 			// 禁止从节点中心拖拽出线条
 			graph.connectionHandler.isConnectableCell = () => false;
 			mxEdgeHandler.prototype.isConnectableCell = () => false;
@@ -533,27 +559,22 @@
 		}
 
 		//设置折叠后的标题
-		function setShortLabel(graph) {
+		function setShortLabel() {
 			// Returns a shorter label if the cell is collapsed and no
 			// label for expanded groups
-			graph.getLabel = function(cell)
-			{
+			graph.getLabel = function (cell) {
 				var tmp = mxGraph.prototype.getLabel.apply(this, arguments); // "supercall"
 
-				if (this.isCellLocked(cell))
-				{
+				if (this.isCellLocked(cell)) {
 					// Returns an empty label but makes sure an HTML
 					// element is created for the label (for event
 					// processing wrt the parent label)
 					return '';
-				}
-				else if (this.isCellCollapsed(cell))
-				{
+				} else if (this.isCellCollapsed(cell)) {
 					var indexStart = tmp.indexOf('">');
 					var indexEnd = tmp.indexOf('</h1>');
 
-					if (indexEnd > 0)
-					{
+					if (indexEnd > 0) {
 						tmp = tmp.substring(indexStart + 2, indexEnd);
 					}
 				}
@@ -563,9 +584,9 @@
 			mxGraph.prototype.collapseExpandResource = '折叠/展开';
 		};
 
-		function setEvent(graph) {
+		function setEvent() {
 			// Shows a "modal" window when double clicking a vertex.
-			graph.dblClick = function(evt, cell) {
+			graph.dblClick = function (evt, cell) {
 				// Do not fire a DOUBLE_CLICK event here as mxEditor will
 				// consume the event and start the in-place editor.
 				if (this.isEnabled() &&
@@ -575,9 +596,8 @@
 					if (this.model.isEdge(cell) ||
 						!this.isHtmlLabel(cell)) {
 						this.startEditingAtCell(cell);
-					}
-					else {
-						if(cell.contentFunc){
+					} else {
+						if (cell.contentFunc) {
 							showEditorWindow(this, '属性设置', cell, 240, 300);
 						}
 					}
@@ -587,7 +607,7 @@
 			};
 		}
 
-		function configureStylesheet(graph) {
+		function configureStylesheet() {
 			var style = new Object();
 			style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
 			style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
@@ -660,7 +680,7 @@
 				return new mxCellState(graph.view, edge, graph.getCellStyle(edge));
 			};
 		}
-	</script>
+    </script>
 </head>
 
 <!-- Page passes the container for the graph to the program -->
@@ -670,40 +690,40 @@
 			document.getElementById('sidebarContainer'),
 			document.getElementById('statusContainer'));" style="margin:0px;">
 
-	<!-- Creates a container for the splash screen -->
-	<div id="splash"
-		style="position:absolute;top:0px;left:0px;width:100%;height:100%;background:white;z-index:1;">
-		<center id="splash" style="padding-top:230px;">
-			<img src="editors/images/loading.gif">
-		</center>
-	</div>
+<!-- Creates a container for the splash screen -->
+<div id="splash"
+     style="position:absolute;top:0px;left:0px;width:100%;height:100%;background:white;z-index:1;">
+    <center id="splash" style="padding-top:230px;">
+        <img src="editors/images/loading.gif">
+    </center>
+</div>
 
-	<!-- Creates a container for the sidebar -->
-	<div id="toolbarContainer"
-		style="position:absolute;white-space:nowrap;overflow:hidden;top:0px;left:0px;max-height:24px;height:36px;right:0px;padding:6px;background-image:url('images/toolbar_bg.gif');">
-	</div>
+<!-- Creates a container for the sidebar -->
+<div id="toolbarContainer"
+     style="position:absolute;white-space:nowrap;overflow:hidden;top:0px;left:0px;max-height:24px;height:36px;right:0px;padding:6px;background-image:url('images/toolbar_bg.gif');">
+</div>
 
-	<!-- Creates a container for the toolboox -->
-	<div id="sidebarContainer"
-		style="position:absolute;overflow:hidden;top:36px;left:0px;bottom:36px;max-width:52px;width:56px;padding-top:10px;padding-left:4px;background-image:url('images/sidebar_bg.gif');">
-	</div>
+<!-- Creates a container for the toolboox -->
+<div id="sidebarContainer"
+     style="position:absolute;overflow:hidden;top:36px;left:0px;bottom:36px;max-width:52px;width:56px;padding-top:10px;padding-left:4px;background-image:url('images/sidebar_bg.gif');">
+</div>
 
-	<!-- Creates a container for the graph -->
-	<div id="graphContainer"
-		style="position:absolute;overflow:hidden;top:36px;left:60px;bottom:36px;right:0px;background-image:url('editors/images/grid.gif');cursor:default;">
-	</div>
+<!-- Creates a container for the graph -->
+<div id="graphContainer"
+     style="position:absolute;overflow:hidden;top:36px;left:60px;bottom:36px;right:0px;background-image:url('editors/images/grid.gif');cursor:default;">
+</div>
 
-	<!-- Creates a container for the outline -->
-	<div id="outlineContainer"
-		style="position:absolute;overflow:hidden;top:36px;right:0px;width:200px;height:140px;background:transparent;border-style:solid;border-color:black;">
-	</div>
+<!-- Creates a container for the outline -->
+<div id="outlineContainer"
+     style="position:absolute;overflow:hidden;top:36px;right:0px;width:200px;height:140px;background:transparent;border-style:solid;border-color:black;">
+</div>
 
-	<!-- Creates a container for the sidebar -->
-	<div id="statusContainer"
-		style="text-align:right;position:absolute;overflow:hidden;bottom:0px;left:0px;max-height:24px;height:36px;right:0px;color:white;padding:6px;background-image:url('images/toolbar_bg.gif');">
-		<div style="font-size:10pt;float:left;">
-			Created with <a href="http://www.jgraph.com" target="_blank">mxGraph</a>
-		</div>
-	</div>
+<!-- Creates a container for the sidebar -->
+<div id="statusContainer"
+     style="text-align:right;position:absolute;overflow:hidden;bottom:0px;left:0px;max-height:24px;height:36px;right:0px;color:white;padding:6px;background-image:url('images/toolbar_bg.gif');">
+    <div style="font-size:10pt;float:left;">
+        Created with <a href="http://www.jgraph.com" target="_blank">mxGraph</a>
+    </div>
+</div>
 </body>
 </html>
