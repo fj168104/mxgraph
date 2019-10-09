@@ -1,14 +1,14 @@
 const elements = [
 	{
-	id: 1,
-	type: 'TASK',
-	typeName: '任务',
-	typeDesp: '',
-	image: 'images/icons48/gear.png',
-	isControllNode: false,
-	style: '',
-	taskClass: 'com.mr.xxx.TaskDemo',
-	contentFunc: createTaskContent
+		id: 1,
+		type: 'TASK',
+		typeName: '任务',
+		typeDesp: '',
+		image: 'images/icons48/gear.png',
+		isControllNode: false,
+		style: '',
+		taskClass: 'com.mr.xxx.TaskDemo',
+		contentFunc: createTaskContent
 	},
 
 	{
@@ -77,13 +77,13 @@ function createStartContent() {
 	let content = document.createElement('div');
 	let table = document.createElement('table');
 
-	addInputElement(table, '名称', 'input', this.data.typeName, 'true');
-	addInputElement(table, '描述', 'textarea', this.data.typeDesp);
+	addInputElement(table, 'input', '名称', this.data.typeName, true);
+	addInputElement(table, 'textarea', '描述', this.data.typeDesp, false, 3);
 
 	content.appendChild(table);
 
 	content.func = function (cell) {
-		cell.data.typeDesp = content.getElementsByTagName('input')[1].value;
+		cell.data.typeDesp = content.getElementsByTagName('textarea')[0].value;
 	};
 	return content;
 }
@@ -92,14 +92,14 @@ function createErrorContent() {
 	let content = document.createElement('div');
 	let table = document.createElement('table');
 
-	addInputElement(table, '名称', 'input', this.data.typeName, 'true');
-	addInputElement(table, '描述', 'textarea', this.data.typeDesp);
-	addInputElement(table, '异常处理类', 'input', this.data.errorClass);
+	addInputElement(table, 'input', '名称', this.data.typeName, true);
+	addInputElement(table, 'textarea', '描述', this.data.typeDesp, false, 3);
+	addInputElement(table, 'input', '异常处理类', this.data.errorClass);
 	content.appendChild(table);
 
 	content.func = function (cell) {
-		cell.data.typeDesp = content.getElementsByTagName('input')[1].value;
-		cell.data.errorClass = content.getElementsByTagName('input')[2].value;
+		cell.data.typeDesp = content.getElementsByTagName('textarea')[0].value;
+		cell.data.errorClass = content.getElementsByTagName('input')[1].value;
 	};
 	return content;
 }
@@ -108,14 +108,14 @@ function createMergeContent() {
 	let content = document.createElement('div');
 	let table = document.createElement('table');
 
-	addInputElement(table, '名称', 'input', this.data.typeName, 'true');
-	addInputElement(table, '描述', 'textarea', this.data.typeDesp);
-	addInputElement(table, '路由条件', 'input', this.data.condition);
+	addInputElement(table, 'input', '名称', this.data.typeName, true);
+	addInputElement(table, 'textarea', '描述', this.data.typeDesp, false, 3);
+	addInputElement(table, 'input', '路由条件', this.data.condition);
 	content.appendChild(table);
 
 	content.func = function (cell) {
-		cell.data.typeDesp = content.getElementsByTagName('input')[1].value;
-		cell.data.condition = content.getElementsByTagName('input')[2].value;
+		cell.data.typeDesp = content.getElementsByTagName('textarea')[0].value;
+		cell.data.condition = content.getElementsByTagName('input')[1].value;
 	};
 	return content;
 }
@@ -124,14 +124,14 @@ function createTaskContent() {
 	let content = document.createElement('div');
 	let table = document.createElement('table');
 
-	addInputElement(table, '名称', 'input', this.data.typeName, 'true');
-	addInputElement(table, '描述', 'textarea', this.data.typeDesp);
-	addInputElement(table, '任务处理类', 'input', this.data.taskClass);
+	addInputElement(table, 'input', '名称', this.data.typeName, true);
+	addInputElement(table, 'textarea', '描述', this.data.typeDesp, false, 3);
+	addInputElement(table, 'input', '任务处理类', this.data.taskClass);
 	content.appendChild(table);
 
 	content.func = function (cell) {
-		cell.data.typeDesp = content.getElementsByTagName('input')[1].value;
-		cell.data.taskClass = content.getElementsByTagName('input')[2].value;
+		cell.data.typeDesp = content.getElementsByTagName('textarea')[0].value;
+		cell.data.taskClass = content.getElementsByTagName('input')[1].value;
 	};
 	return content;
 }
@@ -140,24 +140,24 @@ function createMailContent() {
 	let content = document.createElement('div');
 	let table = document.createElement('table');
 
-	addInputElement(table, '名称', 'input', this.data.typeName, 'true');
-	addInputElement(table, '描述', 'textarea', this.data.typeDesp);
-	addInputElement(table, '收件人', 'input', this.data.To);
-	addInputElement(table, '抄送人', 'input', this.data.Cc);
-	addInputElement(table, '发件人', 'input', this.data.From);
+	addInputElement(table, 'input', '名称', this.data.typeName, true);
+	addInputElement(table, 'textarea', '描述', this.data.typeDesp, false, 3);
+	addInputElement(table, 'input', '收件人', this.data.To);
+	addInputElement(table, 'input', '抄送人', this.data.Cc);
+	addInputElement(table, 'input', '发件人', this.data.From);
 	content.appendChild(table);
 
 	content.func = function (cell) {
-		cell.data.typeDesp = content.getElementsByTagName('input')[1].value;
-		cell.data.To = content.getElementsByTagName('input')[2].value;
-		cell.data.Cc = content.getElementsByTagName('input')[3].value;
-		cell.data.From = content.getElementsByTagName('input')[4].value;
+		cell.data.typeDesp = content.getElementsByTagName('textarea')[0].value;
+		cell.data.To = content.getElementsByTagName('input')[1].value;
+		cell.data.Cc = content.getElementsByTagName('input')[2].value;
+		cell.data.From = content.getElementsByTagName('input')[3].value;
 	};
 	return content;
 }
 
 
-function addInputElement(table, type, name, value, readonly) {
+function addInputElement(table, type, name, value, readonly, rows) {
 	let tr = document.createElement('tr');
 
 	let tdLabel = document.createElement('td');
@@ -166,9 +166,18 @@ function addInputElement(table, type, name, value, readonly) {
 
 	let td = document.createElement('td');
 	let inputData = document.createElement(type);
-	inputData.setAttribute('value', value);
-	if(readonly){
+	if (type === 'textarea') {
+		inputData.innerText = value;
+	} else {
+		inputData.setAttribute('value', value);
+	}
+
+	if (readonly) {
 		inputData.setAttribute('readonly', readonly);
+	}
+
+	if (rows) {
+		inputData.setAttribute('rows', rows);
 	}
 
 	td.appendChild(inputData);

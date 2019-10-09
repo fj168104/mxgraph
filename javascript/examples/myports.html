@@ -78,32 +78,6 @@
 				// Adds sidebar icons.
 				//
 				elements.forEach(element => addSidebarIcon(graph, sidebar,element));
-//				addSidebarIcon(graph, sidebar,
-//					'<h1 style="margin:0px;">任务</h1><br>'+
-//					'todoDespssdddd...<br>todoDespss...<br>todoDespss...<br>',
-//					'images/icons48/gear.png', false, '');
-//
-//				addSidebarIcon(graph, sidebar,
-//					'<h1 style="margin:0px;">邮件</h1><br>'+
-//						'todoDespssdddd...<br>',
-//					'images/icons48/mail_new.png', false, '');
-//
-//				addSidebarIcon(graph, sidebar,
-//						'<h1 style="margin:0px;">开始</h1>',
-//						'images/icons48/event.png', true, 'fillColor=#cdeb8b;shape=ellipse', elements[0], createStartContent);
-//
-//				addSidebarIcon(graph, sidebar,
-//						'<h1 style="margin:0px;">结束</h1>',
-//						'images/icons48/event_end.png', true, 'fillColor=#ffc7c7;shape=ellipse', elements[0], createStartContent);
-//
-//				addSidebarIcon(graph, sidebar,
-//						'<h1 style="margin:0px;">异常</h1>',
-//						'images/icons48/error.png', true, 'fillColor=#f52212;shape=ellipse');
-//
-//				addSidebarIcon(graph, sidebar,
-//						'<h1 style="margin:0px;">分支</h1>',
-//						'images/icons48/merge.png', true, 'fillColor=#91bcc0;shape=ellipse');
-
 
 				// Creates a new DIV that is used as a toolbar and adds
 				// toolbar buttons.
@@ -160,6 +134,9 @@
 				});
 
 				addToolbarButton(editor, toolbar, 'export', 'Export', 'images/export1.png');
+				//
+				addToolbarButton(editor, toolbar, 'save', 'Import', 'images/export1.png');
+				addToolbarButton(editor, toolbar, 'save', 'Save', 'images/export1.png');
 
 				// ---
 
@@ -335,13 +312,14 @@
 		**/
 		function addSidebarIcon(graph, sidebar, elementdata)
 		{
-			let element = Object.assign({}, elementdata);
 
 			// Function that is executed when the image is dropped on
 			// the graph. The cell argument points to the cell under
 			// the mousepointer if there is one.
 			var funct = function(graph, evt, cell, x, y)
 			{
+				let element = Object.assign({}, elementdata);
+
 				var parent = graph.getDefaultParent();
 				var model = graph.getModel();
 
@@ -394,17 +372,21 @@
 
 			// Creates the image which is used as the sidebar icon (drag source)
 			var img = document.createElement('img');
-			img.setAttribute('src', element.image);
+			img.setAttribute('src', elementdata.image);
 			img.style.width = '24px';
 			img.style.height = '24px';
 			img.style.margin = '12px';
-			img.title = 'Drag this to the diagram to create a new vertex';
+			img.title = elementdata.typeName;
 			sidebar.appendChild(img);
 
-			var dragElt = document.createElement('div');
-			dragElt.style.border = 'dashed black 1px';
-			dragElt.style.width = '120px';
-			dragElt.style.height = '80px';
+//			var dragElt = document.createElement('div');
+//			dragElt.style.border = 'dashed black 1px';
+//			dragElt.style.width = '120px';
+//			dragElt.style.height = '80px';
+
+			var dragElt = document.createElement('img');
+			dragElt.setAttribute('src', elementdata.image);
+			dragElt.setAttribute('style', 'width:48px;height:48px;');
 
 			// Creates the image which is used as the drag icon (preview)
 			var ds = mxUtils.makeDraggable(img, graph, funct, dragElt, 0, 0, true, true);
@@ -489,8 +471,8 @@
 				if(cell.isVertex()){
 					let element = cell.getValue();
 					let desp =  element.isControllNode? '' : element.typeDesp;
-
-					return '<br><h1 style="margin:0px;">'+ element.typeName +'</h1><br>' + desp;
+					desp = desp?'<br>' + desp : '';
+					return '<h1 style="margin:0px;">'+ element.typeName +'</h1>' + desp;
 				}
 				return cell.getValue();
 			};
