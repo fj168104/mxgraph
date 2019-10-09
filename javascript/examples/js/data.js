@@ -1,6 +1,6 @@
 const elements = [
 	{
-		id: 1,
+		// id: 'd1',
 		type: 'TASK',
 		typeName: '任务',
 		typeDesp: '',
@@ -12,7 +12,7 @@ const elements = [
 	},
 
 	{
-		id: 2,
+		// id: 'd2',
 		type: 'MAIL',
 		typeName: '邮件',
 		typeDesp: '',
@@ -26,7 +26,7 @@ const elements = [
 	},
 
 	{
-		id: 3,
+		// id: 'd3',
 		type: 'START',
 		typeName: '开始',
 		typeDesp: '',
@@ -37,7 +37,7 @@ const elements = [
 	},
 
 	{
-		id: 4,
+		// id: 'd4',
 		type: 'END',
 		typeName: '结束',
 		typeDesp: '',
@@ -47,7 +47,7 @@ const elements = [
 	},
 
 	{
-		id: 5,
+		// id: 'd5',
 		type: 'ERROR',
 		typeName: '异常',
 		typeDesp: '',
@@ -59,7 +59,7 @@ const elements = [
 	},
 
 	{
-		id: 6,
+		// id: 'd6',
 		type: 'MERGE',
 		typeName: '分支',
 		typeDesp: '',
