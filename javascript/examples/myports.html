@@ -214,6 +214,8 @@
 				let root = doc.documentElement;
 				let dec = new mxCodec(root.ownerDocument);
 				dec.decode(root, graph.getModel());
+				//todo 添加cell双击后世间函数
+
 			} finally {
 				graph.getModel().endUpdate();
 			}
