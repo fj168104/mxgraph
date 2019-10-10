@@ -31,6 +31,7 @@
     <!-- Loads and initializes the library -->
     <script type="text/javascript" src="../src/js/mxClient.js"></script>
     <script type="text/javascript" src="./js/data.js"></script>
+    <script type="text/javascript" src="./js/FileSaver.js"></script>
 
     <!-- Example code -->
     <script type="text/javascript" content="">
@@ -58,7 +59,6 @@
 				setDefaultConfig(editor);
 
 				setAnchors();
-				setGrouping(editor);
 				setShortLabel();
 
 				// 设置editor对象的快捷键
@@ -83,25 +83,11 @@
 				spacer.style.display = 'inline';
 				spacer.style.padding = '8px';
 
-				addToolbarButton(editor, toolbar, 'groupOrUngroup', '(Un)group', 'images/group.png');
 
-				// Defines a new action for deleting or ungrouping
-				editor.addAction('groupOrUngroup', function (editor, cell) {
-					cell = cell || editor.graph.getSelectionCell();
-					if (cell != null && editor.graph.isSwimlane(cell)) {
-						editor.execute('ungroup', cell);
-					} else {
-						editor.execute('group');
-					}
-				});
-
-				addToolbarButton(editor, toolbar, 'delete', 'Delete', 'images/delete2.png');
-
-				toolbar.appendChild(spacer.cloneNode(true));
-
-				addToolbarButton(editor, toolbar, 'cut', 'Cut', 'images/cut.png');
-				addToolbarButton(editor, toolbar, 'copy', 'Copy', 'images/copy.png');
-				addToolbarButton(editor, toolbar, 'paste', 'Paste', 'images/paste.png');
+				addToolbarButton(editor, toolbar, 'copy', '复制', 'images/copy.png');
+				addToolbarButton(editor, toolbar, 'cut', '剪切', 'images/cut.png');
+				addToolbarButton(editor, toolbar, 'paste', '粘贴', 'images/paste.png');
+				addToolbarButton(editor, toolbar, 'delete', '删除', 'images/delete2.png');
 
 				toolbar.appendChild(spacer.cloneNode(true));
 
@@ -110,8 +96,8 @@
 
 				toolbar.appendChild(spacer.cloneNode(true));
 
-				addToolbarButton(editor, toolbar, 'show', 'Show', 'images/camera.png');
-				addToolbarButton(editor, toolbar, 'print', 'Print', 'images/printer.png');
+				addToolbarButton(editor, toolbar, 'show', '快照', 'images/camera.png');
+				addToolbarButton(editor, toolbar, 'print', '打印', 'images/printer.png');
 
 				toolbar.appendChild(spacer.cloneNode(true));
 
@@ -125,23 +111,36 @@
 					textarea.value = mxUtils.getPrettyXml(node);
 					showModalWindow(graph, 'XML', textarea, 410, 440);
 				});
+				addToolbarButton(editor, toolbar, 'export', '源码', 'images/export1.png');
 
-				addToolbarButton(editor, toolbar, 'export', 'Export', 'images/export1.png');
-				//
-				addImportButton(editor, toolbar, 'Import', 'images/export1.png');
-				addToolbarButton(editor, toolbar, 'save', 'Save', 'images/export1.png');
+				// Defines a new export action
+				editor.addAction('import', function (editor, cell) {
+					var fileInput = document.createElement('input');
+					fileInput.setAttribute('style', 'display:none');
+					fileInput.setAttribute('type', 'file');
+					fileInput.addEventListener('change', readFile);
+					fileInput.click();
+
+				});
+				addToolbarButton(editor, toolbar, 'import', '导入', 'images/export1.png');
+
+				// Defines a new export action
+				editor.addAction('save', function (editor, cell) {
+					var enc = new mxCodec(mxUtils.createXmlDocument());
+					var node = enc.encode(editor.graph.getModel());
+					let xml = mxUtils.getPrettyXml(node);
+					console.info(xml);
+					const blob = new Blob([xml], { type: "text/plain;charset=utf-8" });
+					saveAs(blob, "myports.xml");
+				});
+				addToolbarButton(editor, toolbar, 'save', '保存', 'images/export1.png');
 
 				// ---
 
 				// Adds toolbar buttons into the status bar at the bottom
 				// of the window.
-				addToolbarButton(editor, status, 'collapseAll', 'Collapse All', 'images/navigate_minus.png', true);
-				addToolbarButton(editor, status, 'expandAll', 'Expand All', 'images/navigate_plus.png', true);
-
-				status.appendChild(spacer.cloneNode(true));
-
-				addToolbarButton(editor, status, 'enterGroup', 'Enter', 'images/view_next.png', true);
-				addToolbarButton(editor, status, 'exitGroup', 'Exit', 'images/view_previous.png', true);
+				addToolbarButton(editor, status, 'collapseAll', '全部折叠', 'images/navigate_minus.png', true);
+				addToolbarButton(editor, status, 'expandAll', '全部展开', 'images/navigate_plus.png', true);
 
 				status.appendChild(spacer.cloneNode(true));
 
@@ -219,42 +218,7 @@
 				graph.getModel().endUpdate();
 			}
 
-			Object.values(graph.getModel().cells)
-				.forEach(cell => {
-					if (cell.vertex && cell.data) {
-						cell.data = JSON.parse(cell.data);
-					}
-				});
 		};
-
-		function addImportButton(editor, toolbar, label, image) {
-			var fileInput = document.createElement('input');
-			fileInput.setAttribute('style', 'display:none');
-			fileInput.setAttribute('type', 'file');
-			fileInput.addEventListener('change', readFile);
-
-			var button = document.createElement('button');
-			button.style.fontSize = '10';
-			if (image != null) {
-				var img = document.createElement('img');
-				img.setAttribute('src', image);
-				img.style.width = '16px';
-				img.style.height = '16px';
-				img.style.verticalAlign = 'middle';
-				img.style.marginRight = '2px';
-				button.appendChild(img);
-			}
-
-			mxEvent.addListener(button, 'click', function (evt) {
-				fileInput.click();
-			});
-			mxUtils.write(button, label);
-
-			toolbar.appendChild(fileInput);
-			toolbar.appendChild(button);
-
-		};
-
 
 		function showEditorWindow(graph, title, cell, width, height) {
 			var content = cell.contentFunc();
@@ -545,19 +509,6 @@
 				new mxConnectionConstraint(new mxPoint(0.75, 1), true)];
 		};
 
-		function setGrouping(editor) {
-			// Defines the default group to be used for grouping. The
-			// default group is a field in the mxEditor instance that
-			// is supposed to be a cell which is cloned for new cells.
-			// The groupBorderSize is used to define the spacing between
-			// the children of a group and the group bounds.
-			var group = new mxCell('Group', new mxGeometry(), 'group');
-			group.setVertex(true);
-			group.setConnectable(false);
-			editor.defaultGroup = group;
-			editor.groupBorderSize = 20;
-		}
-
 		//设置折叠后的标题
 		function setShortLabel() {
 			// Returns a shorter label if the cell is collapsed and no
@@ -722,7 +673,7 @@
 <div id="statusContainer"
      style="text-align:right;position:absolute;overflow:hidden;bottom:0px;left:0px;max-height:24px;height:36px;right:0px;color:white;padding:6px;background-image:url('images/toolbar_bg.gif');">
     <div style="font-size:10pt;float:left;">
-        Created with <a href="http://www.jgraph.com" target="_blank">mxGraph</a>
+        <a href="http://www.microrule.com" target="_blank">迈融</a>研发
     </div>
 </div>
 </body>
