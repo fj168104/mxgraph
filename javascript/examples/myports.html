@@ -130,7 +130,7 @@
 					var node = enc.encode(editor.graph.getModel());
 					let xml = mxUtils.getPrettyXml(node);
 					console.info(xml);
-					const blob = new Blob([xml], { type: "text/plain;charset=utf-8" });
+					const blob = new Blob([xml], {type: "text/plain;charset=utf-8"});
 					saveAs(blob, "myports.xml");
 				});
 				addToolbarButton(editor, toolbar, 'save', '保存', 'images/export1.png');
@@ -214,11 +214,18 @@
 				let root = doc.documentElement;
 				let dec = new mxCodec(root.ownerDocument);
 				dec.decode(root, graph.getModel());
-				//todo 添加cell双击后世间函数
-
 			} finally {
 				graph.getModel().endUpdate();
 			}
+
+			//todo 添加cell双击后事件函数
+			Object.values(graph.getModel().cells)
+				.forEach(cell => {
+					if (cell.vertex && cell.data) {
+						cell.contentFunc = createTaskContent;
+						alert(JSON.stringify(cell.data))
+					}
+				});
 
 		};
 
