@@ -69,7 +69,6 @@ const elements = [
 		condition: '',
 		contentFunc: createMergeContent
 	},
-
 ];
 
 
@@ -86,6 +85,14 @@ function createStartContent() {
 		cell.data.typeDesp = content.getElementsByTagName('textarea')[0].value;
 	};
 	return content;
+}
+
+const taskFunc = {
+	'TASK': createTaskContent,
+	'MAIL': createMailContent,
+	'START': createStartContent,
+	'ERROR': createErrorContent,
+	'MERGE': createMergeContent
 }
 
 function createErrorContent() {

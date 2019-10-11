@@ -99,7 +99,6 @@
 				addToolbarButton(editor, toolbar, 'show', '快照', 'images/camera.png');
 				addToolbarButton(editor, toolbar, 'print', '打印', 'images/printer.png');
 
-				toolbar.appendChild(spacer.cloneNode(true));
 
 				// Defines a new export action
 				editor.addAction('export', function (editor, cell) {
@@ -218,12 +217,11 @@
 				graph.getModel().endUpdate();
 			}
 
-			//todo 添加cell双击后事件函数
+			//添加cell双击后事件函数
 			Object.values(graph.getModel().cells)
 				.forEach(cell => {
 					if (cell.vertex && cell.data) {
-						cell.contentFunc = createTaskContent;
-						alert(JSON.stringify(cell.data))
+						cell.contentFunc = taskFunc[cell.data.type];
 					}
 				});
 
